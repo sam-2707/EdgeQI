@@ -9,10 +9,11 @@ class MqttClient:
         self.broker = broker
         self.port = port
         self.topic = topic
-        self.client = mqtt.Client()
+        # Corrected client initialization
+        self.client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
         self.client.on_connect = self.on_connect
 
-    def on_connect(self, client, userdata, flags, rc):
+    def on_connect(self, client, userdata, flags, rc, properties=None):
         if rc == 0:
             print("[MQTT] Connected to broker.")
         else:
