@@ -1,7 +1,7 @@
 EDGE-QI: An Energy and QoS-Aware Intelligent Edge Framework
-This repository contains the Python implementation of EDGE-QI, an intelligent framework for edge computing designed for modern IoT systems. This project is based on the research paper "EDGE-QI: An Energy and QoS-Aware Intelligent Edge Framework for Adaptive IoT Task Scheduling".
+This repository contains the Python implementation of EDGE-QI, an intelligent framework for edge computing designed for modern IoT systems. This project is based on the research paper "EDGE-QI: An Energy and QoS-Aware Intelligent Edge Framework for Adaptive IoT Task Scheduling" by Sameer Krishn Sistla and S. Tilak.
 
-EDGE-QI enables adaptive task scheduling, lightweight ML inference, and intelligent data summarization by prioritizing tasks based on context, battery status, and network conditions. This ensures optimal system responsiveness while minimizing redundant communication and saving energy.
+EDGE-QI enables adaptive task scheduling, lightweight ML inference, and intelligent data summarization by prioritizing tasks based on context, device battery status, and network conditions. This ensures optimal system responsiveness while minimizing redundant communication and conserving energy.
 
 Key Features
 The framework is designed to deliver significant improvements over traditional edge computing approaches:
@@ -13,7 +13,6 @@ The framework is designed to deliver significant improvements over traditional e
 🌐 QoS-Aware Network Monitoring: By monitoring network latency, the scheduler ensures that high-priority tasks are executed when the network quality is sufficient, improving reliability.
 
 🧠 Intelligent Data Summarization: To save bandwidth and energy, the framework only transmits data when a significant change or anomaly is detected, filtering out redundant information.
-
 
 🗣️ MQTT-Based Communication: Utilizes the lightweight and scalable MQTT protocol for efficient device-to-server communication, ideal for constrained IoT environments.
 
@@ -38,13 +37,14 @@ EdgeQI/
 │
 ├── main.py             # Main application entry point
 └── requirements.txt    # Project dependencies
+
 Getting Started
 Follow these steps to set up and run the EDGE-QI simulation on your local machine.
 
 Prerequisites
 Python 3.10+
 
-An MQTT Broker: The framework requires a running MQTT broker. Mosquitto is a popular choice.
+An MQTT Broker: The framework requires a running MQTT broker. Mosquitto is a popular and recommended choice.
 
 Download and install Mosquitto.
 
@@ -55,21 +55,18 @@ Configure your firewall to allow traffic on TCP port 1883.
 Installation and Setup
 Clone the repository:
 
-Bash
+git clone https://github.com/your-username/EdgeQI.git
+cd EdgeQI
 
-git clone https://github.com/your-username/your-repo-name.git
-cd your-repo-name
 Create a virtual environment (recommended):
-
-Bash
 
 python -m venv venv
 source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
+
 Install the required Python packages:
 
-Bash
-
 pip install -r requirements.txt
+
 Running the Simulation
 To see the framework in action, you need to run two scripts in separate terminals.
 
@@ -77,18 +74,16 @@ Terminal 1: Start the MQTT Subscriber
 
 This script listens for and displays the results published by the edge device.
 
-Bash
-
 python App/subscriber.py
+
 You should see the message: [Subscriber] Connected to broker.
 
 Terminal 2: Start the EDGE-QI Main Application
 
 This script initializes all the components and starts the intelligent scheduler.
 
-Bash
-
 python main.py
+
 Expected Output
 In the main.py terminal, you will see the scheduler initializing, executing tasks, and publishing results.
 
@@ -111,4 +106,4 @@ Expand Unit Tests: Add comprehensive unit and integration tests to ensure the re
 Citation
 This project is an implementation of the concepts presented in the following paper:
 
-S. K. Sistla and S. Tilak, "EDGE-QI: An Energy and QoS-Aware Intelligent Edge Framework for Adaptive IoT Task Scheduling." 
+Sistla, S. K., & Tilak, S. (2025). EDGE-QI: An Energy and QoS-Aware Intelligent Edge Framework for Adaptive IoT Task Scheduling.
