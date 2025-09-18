@@ -5,6 +5,7 @@ from Core.monitor.energy_monitor import EnergyMonitor
 from Core.monitor.network_monitor import NetworkMonitor
 from ML.tasks.temp_task import TempSensorTask
 from ML.tasks.anomaly_task import MLInferenceTask
+from ML.tasks.vision_task import ComputerVisionTask, QueueAnalysisTask
 from Core.summarizer.summarizer import Summarizer
 from Core.communication.mqtt_client import MqttClient
 
@@ -20,6 +21,8 @@ def main():
     # Create tasks
     temp_task = TempSensorTask()
     ml_task = MLInferenceTask()
+    vision_task = ComputerVisionTask(detector_type="yolo")
+    queue_task = QueueAnalysisTask(detector_type="yolo")
 
     # Wrapper to run task and summarize results before sending
     def wrapped_task(task):
@@ -30,8 +33,10 @@ def main():
         return inner
 
     # Add tasks with priorities (lower number = higher priority)
-    scheduler.add_task(wrapped_task(temp_task), priority=2, task_name=temp_task.name)
-    scheduler.add_task(wrapped_task(ml_task), priority=5, task_name=ml_task.name)
+    scheduler.add_task(wrapped_task(queue_task), priority=1, task_name=queue_task.name)  # Highest priority
+    scheduler.add_task(wrapped_task(vision_task), priority=2, task_name=vision_task.name)
+    scheduler.add_task(wrapped_task(temp_task), priority=3, task_name=temp_task.name)
+    scheduler.add_task(wrapped_task(ml_task), priority=4, task_name=ml_task.name)
 
     try:
         scheduler.run_loop(energy_monitor=energy_monitor, net_monitor=net_monitor, mqtt=mqtt_client)
