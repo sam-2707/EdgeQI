@@ -25,6 +25,7 @@ The project is organized into a modular and scalable directory structure:
 
 ```
 EdgeQI/
+<<<<<<< HEAD
 ├── App/                # Application Layer
 │   ├── dashboard.py    # Real-time dashboard (Streamlit)
 │   └── subscriber.py   # MQTT subscriber
@@ -47,6 +48,21 @@ EdgeQI/
 │
 ├── main.py             # Main application entry point
 ├── run_dashboard.py    # Dashboard launcher
+=======
+├── App/                # Application Layer (Subscriber, Dashboard)
+├── Core/               # Core framework components
+│   ├── communication/
+│   ├── monitor/
+│   ├── scheduler/
+│   └── summarizer/
+├── ML/                 # Machine Learning models and tasks
+│   ├── models/
+│   └── tasks/
+├── hardware/           # Hardware-specific code (e.g., Raspberry Pi)
+├── tests/              # Unit tests for the framework
+│
+├── main.py             # Main application entry point
+>>>>>>> dbac846180f2b23b5166c48b66f8aa3d92b2ed60
 └── requirements.txt    # Project dependencies
 ```
 
@@ -107,6 +123,7 @@ This script initializes all the components and starts the intelligent scheduler.
 python main.py
 ```
 
+<<<<<<< HEAD
 ### Real-time Dashboard
 
 Launch the comprehensive real-time dashboard for queue intelligence visualization:
@@ -131,14 +148,19 @@ The dashboard provides:
 
 Access the dashboard at `http://localhost:8501` after launch.
 
+=======
+>>>>>>> dbac846180f2b23b5166c48b66f8aa3d92b2ed60
 ### Expected Output
 
 In the `main.py` terminal, you will see the scheduler initializing, executing tasks, and publishing results.
 
 Simultaneously, in the `subscriber.py` terminal, you will see the JSON-formatted messages being received from the MQTT broker.
 
+<<<<<<< HEAD
 The dashboard provides real-time visualizations of all system components and queue intelligence data.
 
+=======
+>>>>>>> dbac846180f2b23b5166c48b66f8aa3d92b2ed60
 ---
 
 ## Project Status
@@ -162,4 +184,8 @@ The next steps to advance this project from simulation to a real-world applicati
 
 This project is an implementation of the concepts presented in the following paper:
 
+<<<<<<< HEAD
 > Sistla, S. K., & Tilak, S. (2025). *EDGE-QI: An Energy and QoS-Aware Intelligent Edge Framework for Adaptive IoT Task Scheduling.*
+=======
+> Sistla, S. K., & Tilak, S. (2025). *EDGE-QI: An Energy and QoS-Aware Intelligent Edge Framework for Adaptive IoT Task Scheduling.*
+>>>>>>> dbac846180f2b23b5166c48b66f8aa3d92b2ed60
