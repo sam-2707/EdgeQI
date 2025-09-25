@@ -109,15 +109,15 @@ def init_dashboard_components():
         # Initialize edge coordinator
         if not dashboard_state.edge_coordinator:
             dashboard_state.edge_coordinator = EdgeCoordinator(
-                node_id="dashboard_node",
-                role=EdgeRole.COORDINATOR,
+                edge_id="dashboard_node",
+                initial_role=EdgeRole.COORDINATOR,
                 camera_position=(500, 300)
             )
         
         # Initialize traffic analyzer
         if not dashboard_state.traffic_analyzer:
             dashboard_state.traffic_analyzer = TrafficFlowAnalyzer(
-                width=1000, height=600
+                frame_width=1000, frame_height=600
             )
         
         # Initialize anomaly detector

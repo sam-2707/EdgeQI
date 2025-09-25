@@ -1,0 +1,55 @@
+{
+  "demo_info": {
+    "timestamp": 1758789906.9900055,
+    "duration": 20.022199869155884,
+    "demo_type": "headless_realtime"
+  },
+  "performance_stats": {
+    "frames_processed": 107,
+    "detections_made": 957,
+    "queues_detected": 0,
+    "anomalies_found": 0,
+    "start_time": 1758789886.9655998,
+    "runtime": 20.022199869155884,
+    "fps": 5.344068119349515
+  },
+  "detection_history": [
+    2,
+    10,
+    14
+  ],
+  "traffic_history": [
+    {
+      "timestamp": 1758789891.9616816,
+      "vehicle_count": 2,
+      "average_speed": 26.506179385251187,
+      "density": 0.021701388888888888,
+      "condition": "free_flow",
+      "throughput": 0.8835393128417063
+    },
+    {
+      "timestamp": 1758789896.8519838,
+      "vehicle_count": 10,
+      "average_speed": 26.76738811450904,
+      "density": 0.10850694444444445,
+      "condition": "free_flow",
+      "throughput": 4.461231352418173
+    },
+    {
+      "timestamp": 1758789901.9473903,
+      "vehicle_count": 14,
+      "average_speed": 25.085839423228773,
+      "density": 0.15190972222222224,
+      "condition": "free_flow",
+      "throughput": 5.853362532086714
+    }
+  ],
+  "queue_history": [],
+  "alerts_generated": [],
+  "analysis": {
+    "avg_detections_per_frame": 8.666666666666666,
+    "total_queue_instances": 0,
+    "avg_wait_time": 0,
+    "avg_traffic_speed": 26.119802307662997
+  }
+}

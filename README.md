@@ -25,7 +25,6 @@ The project is organized into a modular and scalable directory structure:
 
 ```
 EdgeQI/
-<<<<<<< HEAD
 ├── App/                # Application Layer
 │   ├── dashboard.py    # Real-time dashboard (Streamlit)
 │   └── subscriber.py   # MQTT subscriber
@@ -48,21 +47,6 @@ EdgeQI/
 │
 ├── main.py             # Main application entry point
 ├── run_dashboard.py    # Dashboard launcher
-=======
-├── App/                # Application Layer (Subscriber, Dashboard)
-├── Core/               # Core framework components
-│   ├── communication/
-│   ├── monitor/
-│   ├── scheduler/
-│   └── summarizer/
-├── ML/                 # Machine Learning models and tasks
-│   ├── models/
-│   └── tasks/
-├── hardware/           # Hardware-specific code (e.g., Raspberry Pi)
-├── tests/              # Unit tests for the framework
-│
-├── main.py             # Main application entry point
->>>>>>> dbac846180f2b23b5166c48b66f8aa3d92b2ed60
 └── requirements.txt    # Project dependencies
 ```
 
