@@ -72,7 +72,7 @@ def safe_initialize_components():
             
         if st.session_state.simulator is None:
             st.session_state.simulator = RealTimeDataSimulator(
-                fps=8, frame_width=1280, frame_height=720
+                fps=8, width=1280, height=720
             )
             
         return True
@@ -88,8 +88,8 @@ def start_simulation():
         
     try:
         if not st.session_state.simulation_running:
-            st.session_state.integrator.start()
-            st.session_state.simulator.start()
+            st.session_state.integrator.start_real_time_processing()
+            st.session_state.simulator.start_simulation()
             st.session_state.simulation_running = True
             st.success("✅ Real-time simulation started successfully!")
             return True
@@ -103,9 +103,9 @@ def stop_simulation():
     try:
         if st.session_state.simulation_running:
             if st.session_state.integrator:
-                st.session_state.integrator.stop()
+                st.session_state.integrator.stop_real_time_processing()
             if st.session_state.simulator:
-                st.session_state.simulator.stop()
+                st.session_state.simulator.stop_simulation()
             st.session_state.simulation_running = False
             st.success("⏹️ Simulation stopped successfully!")
     except Exception as e:
@@ -119,15 +119,15 @@ def get_simulation_data():
             return None, [], [], {}
             
         # Get latest frame
-        frame = st.session_state.simulator.get_latest_frame()
+        frame_data = st.session_state.simulator.get_latest_frame()
+        frame = frame_data['frame'] if frame_data else None
         
         # Get detections and queues
-        results = st.session_state.integrator.get_latest_results()
-        detections = results.get('detections', [])
-        queues = results.get('queues', [])
+        detections = st.session_state.integrator.get_current_detections()
+        queues = st.session_state.integrator.get_current_queue_data()
         
         # Get performance metrics
-        metrics = st.session_state.integrator.get_performance_metrics()
+        metrics = st.session_state.integrator.get_processing_stats()
         
         # Update cache
         st.session_state.data_cache.update({

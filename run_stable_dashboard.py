@@ -77,9 +77,13 @@ def stop_realtime_processing():
     """Stop real-time processing"""
     if st.session_state.rt_integrator and st.session_state.rt_running:
         try:
+            # Keep the last data for analytics display
+            if 'rt_data' in st.session_state and st.session_state.rt_data:
+                st.session_state.last_session_data = st.session_state.rt_data.copy()
+            
             st.session_state.rt_integrator.stop_real_time_processing()
             st.session_state.rt_running = False
-            st.info("⏹️ Real-time processing stopped")
+            st.info("⏹️ Real-time processing stopped - Analytics preserved")
         except Exception as e:
             st.error(f"Failed to stop real-time processing: {e}")
 
@@ -140,6 +144,120 @@ def create_annotated_frame(frame, data):
     except Exception as e:
         st.error(f"Error creating annotated frame: {e}")
         return frame
+
+def display_analytics_section(data):
+    """Display analytics section for both live and historical data"""
+    if not data:
+        return
+    
+    # Import required modules
+    import pandas as pd
+    import plotly.graph_objects as go
+    import plotly.express as px
+    
+    # Extract data
+    detections = data.get('detections', [])
+    traffic = data.get('traffic', {})
+    queues = data.get('queues', [])
+    sensors = data.get('sensors', {})
+    stats = data.get('stats', {})
+    
+    # Summary metrics
+    st.markdown("---")
+    st.subheader("📊 Session Summary")
+    
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.metric("Total Detections", len(detections))
+    with col2:
+        st.metric("FPS", f"{stats.get('fps', 0):.1f}")
+    with col3:
+        st.metric("Frames Processed", stats.get('frames_processed', 0))
+    with col4:
+        avg_confidence = sum([d.get('confidence', 0) for d in detections]) / len(detections) if detections else 0
+        st.metric("Avg Confidence", f"{avg_confidence:.2f}")
+    
+    # Traffic analysis
+    if traffic or detections:
+        st.markdown("---")
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.subheader("🚗 Traffic Analysis")
+            if traffic:
+                metrics = ['Vehicles', 'Speed', 'Density', 'Throughput']
+                values = [
+                    traffic.get('vehicle_count', 0),
+                    traffic.get('average_speed', 0),
+                    traffic.get('density', 0) * 100,
+                    traffic.get('throughput', 0) * 10
+                ]
+                
+                fig = go.Figure(data=go.Bar(x=metrics, y=values))
+                fig.update_layout(title="Traffic Metrics", height=300)
+                st.plotly_chart(fig, use_container_width=True)
+        
+        with col2:
+            st.subheader("🔍 Detection Types")
+            if detections:
+                detection_types = {}
+                for d in detections:
+                    vehicle_type = d.get('class', 'unknown')
+                    detection_types[vehicle_type] = detection_types.get(vehicle_type, 0) + 1
+                
+                if detection_types:
+                    fig = px.pie(values=list(detection_types.values()), 
+                                names=list(detection_types.keys()))
+                    fig.update_layout(height=300)
+                    st.plotly_chart(fig, use_container_width=True)
+    
+    # Queue analysis
+    if queues:
+        st.markdown("---")
+        st.subheader("📋 Queue Analysis")
+        
+        queue_df = pd.DataFrame([
+            {
+                'Queue ID': q.get('id', 'N/A'),
+                'Vehicles': q.get('vehicle_count', 0),
+                'Wait Time (s)': f"{q.get('wait_time', 0):.0f}",
+                'Length': f"{q.get('length', 0)/10:.1f}m",
+                'Confidence': f"{q.get('confidence', 0):.2f}"
+            }
+            for q in queues
+        ])
+        
+        st.dataframe(queue_df, use_container_width=True)
+    
+    # Sensor data
+    if sensors:
+        st.markdown("---")
+        st.subheader("🌡️ Environmental Data")
+        
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("CPU Usage", f"{sensors.get('cpu_usage', 0):.1f}%")
+        with col2:
+            st.metric("Memory Usage", f"{sensors.get('memory_usage', 0):.1f}%")
+        with col3:
+            st.metric("Temperature", f"{sensors.get('temperature', 0):.1f}°C")
+    
+    # Detailed detection list
+    if detections:
+        with st.expander("🔍 Detailed Detection Data"):
+            detection_df = pd.DataFrame([
+                {
+                    'Class': d.get('class', 'unknown'),
+                    'Confidence': f"{d.get('confidence', 0):.3f}",
+                    'Speed': f"{d.get('speed', 0):.1f}",
+                    'Location': f"({d.get('bbox', [0,0,0,0])[0]:.0f}, {d.get('bbox', [0,0,0,0])[1]:.0f})"
+                }
+                for d in detections[:20]  # Show first 20 detections
+            ])
+            st.dataframe(detection_df, use_container_width=True)
+            
+            if len(detections) > 20:
+                st.info(f"Showing first 20 of {len(detections)} total detections")
 
 def main():
     """Main dashboard function"""
@@ -214,16 +332,30 @@ def main():
     
     # Main content
     if not st.session_state.rt_running:
-        st.info("🎬 Click 'Start' to begin real-time processing")
-        st.markdown("""
-        ### 🚀 Stable Real-Time Features:
-        - **Controlled Refresh Rate**: Prevents dashboard crashes
-        - **Session State Management**: Maintains stability across refreshes  
-        - **Error Handling**: Graceful error recovery
-        - **Live Camera Simulation**: Realistic traffic patterns
-        - **Real-Time Analytics**: Queue detection and traffic monitoring
-        - **Interactive Controls**: Adjust settings in real-time
-        """)
+        # Show historical analytics if available
+        data_to_show = st.session_state.rt_data or st.session_state.get('last_session_data')
+        if data_to_show:
+            st.info("📊 Showing last session analytics - Click 'Start' to begin new processing")
+            display_analytics_section(data_to_show)
+            
+            # Add option to clear analytics
+            if st.button("🗑️ Clear Analytics"):
+                if 'rt_data' in st.session_state:
+                    del st.session_state.rt_data
+                if 'last_session_data' in st.session_state:
+                    del st.session_state.last_session_data
+                st.rerun()
+        else:
+            st.info("🎬 Click 'Start' to begin real-time processing")
+            st.markdown("""
+            ### 🚀 Stable Real-Time Features:
+            - **Controlled Refresh Rate**: Prevents dashboard crashes
+            - **Session State Management**: Maintains stability across refreshes  
+            - **Error Handling**: Graceful error recovery
+            - **Live Camera Simulation**: Realistic traffic patterns
+            - **Real-Time Analytics**: Queue detection and traffic monitoring
+            - **Interactive Controls**: Adjust settings in real-time
+            """)
         return
     
     # Display real-time data
@@ -277,57 +409,8 @@ def main():
             st.metric("Memory", f"{sensors.get('memory_usage', 0):.1f}%")
             st.metric("Temp", f"{sensors.get('temperature', 0):.1f}°C")
     
-    # Analytics
-    if traffic or detections:
-        st.markdown("---")
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            st.subheader("🚗 Traffic Analysis")
-            if traffic:
-                metrics = ['Vehicles', 'Speed', 'Density', 'Throughput']
-                values = [
-                    traffic.get('vehicle_count', 0),
-                    traffic.get('average_speed', 0),
-                    traffic.get('density', 0) * 100,
-                    traffic.get('throughput', 0) * 10
-                ]
-                
-                fig = go.Figure(data=go.Bar(x=metrics, y=values))
-                fig.update_layout(title="Traffic Metrics", height=300)
-                st.plotly_chart(fig, width="stretch")
-        
-        with col2:
-            st.subheader("🔍 Detection Types")
-            if detections:
-                detection_types = {}
-                for d in detections:
-                    vehicle_type = d.get('class', 'unknown')
-                    detection_types[vehicle_type] = detection_types.get(vehicle_type, 0) + 1
-                
-                if detection_types:
-                    fig = px.pie(values=list(detection_types.values()), 
-                                names=list(detection_types.keys()))
-                    fig.update_layout(height=300)
-                    st.plotly_chart(fig, width="stretch")
-    
-    # Queue analysis
-    if queues:
-        st.markdown("---")
-        st.subheader("📋 Queue Analysis")
-        
-        queue_df = pd.DataFrame([
-            {
-                'Queue ID': q.get('id', 'N/A'),
-                'Vehicles': q.get('vehicle_count', 0),
-                'Wait Time (s)': f"{q.get('wait_time', 0):.0f}",
-                'Length': f"{q.get('length', 0)/10:.1f}m",
-                'Confidence': f"{q.get('confidence', 0):.2f}"
-            }
-            for q in queues
-        ])
-        
-        st.dataframe(queue_df, width="stretch")
+    # Display comprehensive analytics
+    display_analytics_section(data)
     
     # Last update time
     st.markdown("---")
