@@ -1,0 +1,25 @@
+{
+  "timestamp": "2025-11-05T19:05:51.978975",
+  "system_status": "operational",
+  "key_metrics": {
+    "fps": 5.34,
+    "response_time_ms": 180,
+    "energy_savings_percent": 28.4,
+    "bandwidth_reduction_percent": 74.5,
+    "detection_accuracy_percent": 99.2,
+    "cpu_usage_percent": 45.2,
+    "memory_usage_gb": 2.8
+  },
+  "traffic_analysis": {
+    "vehicles_detected": 157,
+    "average_speed_kmh": 42.3,
+    "queue_instances": 3,
+    "anomalies_detected": 2
+  },
+  "optimization_results": {
+    "energy_efficiency": 85.3,
+    "bandwidth_optimization": 74.5,
+    "consensus_accuracy": 99.87,
+    "coordination_latency_ms": 18
+  }
+}

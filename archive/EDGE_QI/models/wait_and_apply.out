@@ -1,0 +1,15 @@
+nohup: ignoring input
+/home/tilak/miniconda3/envs/tf/lib/python3.10/site-packages/torch/cuda/__init__.py:61: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+wait_and_apply_next_epoch starting: new_batch= 16 new_imgsz= 320
+current epoch detected: 22 of 100
+waiting for epoch > 22 (timeout 3600s)
+detected epoch increment: 22 -> 32
+performing backup and relaunch at epoch 32
+backup complete to /home/tilak/my_projects/EDGE_QI/backups/backup_before_batch16_img320_20251101_153027
+patched /home/tilak/my_projects/EDGE_QI/models/model_config.yaml -> img_size 320
+process exited after SIGINT
+relaunch cmd: OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=2 MKL_NUM_THREADS=2 PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:128 /home/tilak/miniconda3/envs/tf/bin/python /home/tilak/my_projects/EDGE_QI/models/train_yolo.py --config /home/tilak/my_projects/EDGE_QI/models/model_config.yaml --model yolov8n --device cuda --batch-size 16 --imgsz 320 --resume > /home/tilak/my_projects/EDGE_QI/models/train.log 2>&1 & echo $! > /home/tilak/my_projects/EDGE_QI/models/train.pid
+relaunch attempted
+cuda True device_count 1
+

@@ -1,0 +1,1 @@
+source /home/tilak/miniconda3/bin/activate tf

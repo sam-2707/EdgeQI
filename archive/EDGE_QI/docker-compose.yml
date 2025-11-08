@@ -1,0 +1,342 @@
+version: '3.8'
+
+services:
+  # ================== INFRASTRUCTURE ==================
+  
+  # MQTT Broker (Eclipse Mosquitto)
+  mqtt-broker:
+    image: eclipse-mosquitto:2.0
+    container_name: edge-qi-mqtt
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./docker/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - ./docker/mosquitto/data:/mosquitto/data
+      - ./docker/mosquitto/log:/mosquitto/log
+    networks:
+      - edge-qi-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mosquitto_pub", "-h", "localhost", "-t", "test", "-m", "test"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # PostgreSQL with TimescaleDB extension
+  timescaledb:
+    image: timescale/timescaledb:2.11.1-pg15
+    container_name: edge-qi-timescale
+    environment:
+      POSTGRES_DB: edge_qi
+      POSTGRES_USER: edge_qi_user
+      POSTGRES_PASSWORD: edge_qi_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - timescaledb_data:/var/lib/postgresql/data
+      - ./docker/timescaledb/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - edge-qi-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U edge_qi_user -d edge_qi"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Redis for caching and real-time data
+  redis:
+    image: redis:7-alpine
+    container_name: edge-qi-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - edge-qi-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ================== BACKEND SERVICES ==================
+
+  # FastAPI Backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: edge-qi-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://edge_qi_user:edge_qi_password@timescaledb:5432/edge_qi
+      - REDIS_URL=redis://redis:6379
+      - MQTT_BROKER_HOST=mqtt-broker
+      - MQTT_BROKER_PORT=1883
+      - CORS_ORIGINS=http://localhost:3000
+    volumes:
+      - ./backend:/app
+    networks:
+      - edge-qi-network
+    depends_on:
+      - timescaledb
+      - redis
+      - mqtt-broker
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ================== FRONTEND ==================
+
+  # Next.js Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: edge-qi-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - NEXT_PUBLIC_MQTT_URL=ws://localhost:9001
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - edge-qi-network
+    depends_on:
+      - backend
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ================== EDGE NODES ==================
+
+  # Edge Node Alpha (Layer 1 - Traffic Light Controller)
+  edge-node-alpha:
+    build:
+      context: ./edge_nodes
+      dockerfile: Dockerfile
+    container_name: edge-qi-node-alpha
+    environment:
+      - NODE_ID=node_alpha_001
+      - NODE_NAME=Alpha Intersection Controller
+      - LAYER=1
+      - INTERSECTION_ID=int_alpha
+      - LATITUDE=40.7128
+      - LONGITUDE=-74.0060
+      - ELEVATION=10.0
+      - MQTT_BROKER=mqtt-broker
+      - MQTT_PORT=1883
+      - ML_ACCELERATION=true
+      - CAMERA_ENABLED=true
+    volumes:
+      - ./edge_nodes:/app
+      - ./datasets/video:/app/video_data
+    networks:
+      - edge-qi-network
+    depends_on:
+      - mqtt-broker
+      - backend
+    restart: unless-stopped
+
+  # Edge Node Beta (Layer 2 - Smart Camera)
+  edge-node-beta:
+    build:
+      context: ./edge_nodes
+      dockerfile: Dockerfile
+    container_name: edge-qi-node-beta
+    environment:
+      - NODE_ID=node_beta_002
+      - NODE_NAME=Beta Smart Camera
+      - LAYER=2
+      - INTERSECTION_ID=int_beta
+      - LATITUDE=40.7589
+      - LONGITUDE=-73.9851
+      - ELEVATION=8.5
+      - MQTT_BROKER=mqtt-broker
+      - MQTT_PORT=1883
+      - ML_ACCELERATION=false
+      - CAMERA_ENABLED=true
+    volumes:
+      - ./edge_nodes:/app
+      - ./datasets/video:/app/video_data
+    networks:
+      - edge-qi-network
+    depends_on:
+      - mqtt-broker
+      - backend
+    restart: unless-stopped
+
+  # Edge Node Gamma (Layer 3 - Environmental Sensor)
+  edge-node-gamma:
+    build:
+      context: ./edge_nodes
+      dockerfile: Dockerfile
+    container_name: edge-qi-node-gamma
+    environment:
+      - NODE_ID=node_gamma_003
+      - NODE_NAME=Gamma Environmental Sensor
+      - LAYER=3
+      - INTERSECTION_ID=int_gamma
+      - LATITUDE=40.7505
+      - LONGITUDE=-73.9934
+      - ELEVATION=12.0
+      - MQTT_BROKER=mqtt-broker
+      - MQTT_PORT=1883
+      - ML_ACCELERATION=false
+      - CAMERA_ENABLED=false
+    volumes:
+      - ./edge_nodes:/app
+      - ./datasets/sensor:/app/sensor_data
+    networks:
+      - edge-qi-network
+    depends_on:
+      - mqtt-broker
+      - backend
+    restart: unless-stopped
+
+  # ================== MONITORING & TESTING ==================
+
+  # Prometheus for metrics collection
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: edge-qi-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    networks:
+      - edge-qi-network
+    restart: unless-stopped
+
+  # Grafana for visualization
+  grafana:
+    image: grafana/grafana:latest
+    container_name: edge-qi-grafana
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./docker/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./docker/grafana/datasources:/etc/grafana/provisioning/datasources
+    networks:
+      - edge-qi-network
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+  # Test Runner for automated testing
+  test-runner:
+    build:
+      context: ./tests
+      dockerfile: Dockerfile
+    container_name: edge-qi-tests
+    environment:
+      - BACKEND_URL=http://backend:8000
+      - MQTT_BROKER=mqtt-broker
+    volumes:
+      - ./tests:/app
+      - ./test_results:/app/results
+    networks:
+      - edge-qi-network
+    depends_on:
+      - backend
+      - mqtt-broker
+    profiles:
+      - testing
+    command: ["python", "-m", "pytest", "-v", "--html=/app/results/report.html"]
+
+  # ================== LOAD BALANCER ==================
+
+  # Nginx reverse proxy and load balancer
+  nginx:
+    image: nginx:alpine
+    container_name: edge-qi-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./docker/nginx/ssl:/etc/nginx/ssl
+    networks:
+      - edge-qi-network
+    depends_on:
+      - frontend
+      - backend
+    restart: unless-stopped
+
+# ================== NETWORKS ==================
+networks:
+  edge-qi-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+# ================== VOLUMES ==================
+volumes:
+  timescaledb_data:
+    driver: local
+  redis_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+
+# ================== ADDITIONAL SERVICES ==================
+# Uncomment these for production deployment
+
+  # # Elasticsearch for log aggregation
+  # elasticsearch:
+  #   image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+  #   container_name: edge-qi-elasticsearch
+  #   environment:
+  #     - discovery.type=single-node
+  #     - xpack.security.enabled=false
+  #   ports:
+  #     - "9200:9200"
+  #   volumes:
+  #     - elasticsearch_data:/usr/share/elasticsearch/data
+  #   networks:
+  #     - edge-qi-network
+
+  # # Kibana for log visualization
+  # kibana:
+  #   image: docker.elastic.co/kibana/kibana:8.11.0
+  #   container_name: edge-qi-kibana
+  #   ports:
+  #     - "5601:5601"
+  #   environment:
+  #     - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+  #   networks:
+  #     - edge-qi-network
+  #   depends_on:
+  #     - elasticsearch
+
+  # # ML Model Server (TensorFlow Serving)
+  # ml-server:
+  #   image: tensorflow/serving:latest
+  #   container_name: edge-qi-ml-server
+  #   ports:
+  #     - "8501:8501"
+  #   volumes:
+  #     - ./models:/models
+  #   environment:
+  #     - MODEL_NAME=traffic_detection
+  #   networks:
+  #     - edge-qi-network
