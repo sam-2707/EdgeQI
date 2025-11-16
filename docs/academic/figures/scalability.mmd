@@ -1,0 +1,17 @@
+graph LR
+    N1[1 Node<br/>5.34 FPS<br/>187ms latency<br/>28.6% CPU<br/>0% BFT]
+    N3[3 Nodes<br/>15.89 FPS<br/>151ms latency<br/>31.2% CPU<br/>4.8% BFT]
+    N5[5 Nodes<br/>26.21 FPS<br/>158ms latency<br/>34.8% CPU<br/>6.2% BFT]
+    N7[7 Nodes<br/>36.42 FPS<br/>165ms latency<br/>38.4% CPU<br/>7.0% BFT]
+    N10[10 Nodes<br/>51.78 FPS<br/>179ms latency<br/>43.7% CPU<br/>8.9% BFT]
+    
+    N1 -->|Linear Speedup| N3
+    N3 -->|Linear Speedup| N5
+    N5 -->|Linear Speedup| N7
+    N7 -->|Linear Speedup| N10
+    
+    style N1 fill:#FFC107,stroke:#F57C00,stroke-width:2px,color:#000
+    style N3 fill:#FF9800,stroke:#E65100,stroke-width:2px,color:#fff
+    style N5 fill:#FF5722,stroke:#D84315,stroke-width:2px,color:#fff
+    style N7 fill:#F44336,stroke:#C62828,stroke-width:2px,color:#fff
+    style N10 fill:#E91E63,stroke:#AD1457,stroke-width:3px,color:#fff

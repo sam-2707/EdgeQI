@@ -1,0 +1,25 @@
+graph TB
+    subgraph Baseline[Baseline System]
+        B1[No Optimization<br/>8420 Joules<br/>100% Energy]
+    end
+    
+    subgraph Fixed[Fixed Scheduling]
+        F1[Static Policy<br/>7150 Joules<br/>15.1% Saved]
+    end
+    
+    subgraph EDGEQI[EDGE-QI Adaptive]
+        E1[Dynamic Weights<br/>6030 Joules<br/>28.4% Saved ✓]
+    end
+    
+    subgraph EnergyFocus[Energy-Focused Config]
+        EF1[α=0.6 Mode<br/>5780 Joules<br/>31.4% Saved<br/>+18% Latency ⚠️]
+    end
+    
+    B1 -->|Optimization| F1
+    F1 -->|Adaptive| E1
+    E1 -->|Max Energy Mode| EF1
+    
+    style B1 fill:#F44336,stroke:#C62828,stroke-width:2px,color:#fff
+    style F1 fill:#FF9800,stroke:#E65100,stroke-width:2px,color:#fff
+    style E1 fill:#4CAF50,stroke:#2E7D32,stroke-width:3px,color:#fff
+    style EF1 fill:#2196F3,stroke:#1565C0,stroke-width:2px,color:#fff

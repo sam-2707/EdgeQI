@@ -1,0 +1,26 @@
+flowchart LR
+    Start([Video Frame]) --> Detect[YOLOv8n Detection<br/>Vehicle Count = 42]
+    Detect --> CheckBaseline{Baseline<br/>Ready?<br/>|H| ≥ 100}
+    
+    CheckBaseline -->|No| AddHistory[Add to History H<br/>Build Baseline]
+    AddHistory --> Transmit1[✓ Transmit Frame<br/>For Baseline Building]
+    
+    CheckBaseline -->|Yes| CalcStats[Calculate Statistics<br/>μ = mean H<br/>σ = std H]
+    CalcStats --> CalcZ[Calculate Z-Score<br/>z = count - μ / σ]
+    
+    CalcZ --> CheckThreshold{|z| > 2.0σ?}
+    CheckThreshold -->|Yes| Anomaly[🚨 ANOMALY DETECTED<br/>z = 2.34<br/>High Congestion]
+    CheckThreshold -->|No| Normal[✓ Normal Traffic<br/>z = 0.14<br/>Routine]
+    
+    Anomaly --> Transmit2[✓ Transmit to Cloud<br/>24% of Frames]
+    Normal --> Skip[⊗ Skip Transmission<br/>76% of Frames<br/>Local Cache Only]
+    
+    Transmit2 --> Update[Update Sliding Window<br/>Remove Oldest, Add New]
+    Skip --> Update
+    Update --> End([Next Frame])
+    
+    style Start fill:#4CAF50,stroke:#2E7D32,stroke-width:3px,color:#fff
+    style Anomaly fill:#F44336,stroke:#C62828,stroke-width:3px,color:#fff
+    style Normal fill:#66BB6A,stroke:#388E3C,stroke-width:2px,color:#fff
+    style Transmit2 fill:#FF9800,stroke:#E65100,stroke-width:2px,color:#fff
+    style Skip fill:#9E9E9E,stroke:#616161,stroke-width:2px,color:#fff

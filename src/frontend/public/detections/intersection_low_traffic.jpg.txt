@@ -1,0 +1,3 @@
+Placeholder for intersection_low_traffic.jpg
+This file represents the low traffic intersection scenario with cars, tricycles, and motorcycles.
+The user should copy their actual traffic monitoring image here with this filename.

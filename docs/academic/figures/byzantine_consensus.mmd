@@ -1,0 +1,40 @@
+sequenceDiagram
+    participant E1 as Edge Node 1<br/>(Honest)
+    participant E2 as Edge Node 2<br/>(Honest)
+    participant E3 as Edge Node 3<br/>(Byzantine)
+    participant E4 as Edge Node 4<br/>(Honest)
+    
+    Note over E1,E4: Phase 1: Local Detection
+    E1->>E1: YOLOv8 Detection<br/>Count = 42 vehicles
+    E2->>E2: YOLOv8 Detection<br/>Count = 43 vehicles
+    E3->>E3: YOLOv8 Detection<br/>Count = 95 vehicles ⚠️ ATTACK
+    E4->>E4: YOLOv8 Detection<br/>Count = 41 vehicles
+    
+    Note over E1,E4: Phase 2: Broadcast Reports
+    E1->>E2: Broadcast: 42
+    E1->>E3: Broadcast: 42
+    E1->>E4: Broadcast: 42
+    
+    E2->>E1: Broadcast: 43
+    E2->>E3: Broadcast: 43
+    E2->>E4: Broadcast: 43
+    
+    E3->>E1: Broadcast: 95 ⚠️
+    E3->>E2: Broadcast: 95 ⚠️
+    E3->>E4: Broadcast: 95 ⚠️
+    
+    E4->>E1: Broadcast: 41
+    E4->>E2: Broadcast: 41
+    E4->>E3: Broadcast: 41
+    
+    Note over E1,E4: Phase 3: Gradient Clipping
+    E1->>E1: Clip: [42, 43, 95→52, 41]<br/>Median=42.5, Δ=10
+    E2->>E2: Clip: [42, 43, 95→52, 41]<br/>Median=42.5, Δ=10
+    E4->>E4: Clip: [42, 43, 95→52, 41]<br/>Median=42.5, Δ=10
+    
+    Note over E1,E4: Phase 4: Trimmed Mean Aggregation
+    E1->>E1: Remove top/bottom 10%<br/>Mean([42,43,41]) = 42
+    E2->>E2: Remove top/bottom 10%<br/>Mean([42,43,41]) = 42
+    E4->>E4: Remove top/bottom 10%<br/>Mean([42,43,41]) = 42
+    
+    Note over E1,E4: ✓ Consensus: 42 vehicles<br/>Byzantine Node 3 Neutralized<br/>99.87% Accuracy

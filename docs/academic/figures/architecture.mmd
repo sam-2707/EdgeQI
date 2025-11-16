@@ -1,0 +1,55 @@
+graph TB
+    subgraph "Layer 1: Perception Layer"
+        C1[4K Camera 1<br/>1920×1080 @ 30 FPS]
+        C2[4K Camera 2<br/>1920×1080 @ 30 FPS]
+        C3[4K Camera 3<br/>1920×1080 @ 30 FPS]
+        C4[4K Camera N<br/>1920×1080 @ 30 FPS]
+    end
+    
+    subgraph "Layer 2: Edge Computing Layer"
+        E1[Edge Node 1<br/>Raspberry Pi 4 / Jetson Nano]
+        E2[Edge Node 2<br/>Raspberry Pi 4 / Jetson Nano]
+        E3[Edge Node 3<br/>Raspberry Pi 4 / Jetson Nano]
+        
+        subgraph "Edge Processing Pipeline"
+            Y[YOLOv8n Detection<br/>6.25MB, 5.34 FPS]
+            A[Z-Score Anomaly<br/>Detection θ=2.0σ]
+            S[Multi-Constraint<br/>Scheduler]
+            B[Byzantine Consensus<br/>99.87% Accuracy]
+        end
+    end
+    
+    subgraph "Layer 3: Cloud Storage Layer"
+        API[FastAPI Backend<br/>REST Endpoints]
+        DB[(PostgreSQL 14<br/>Detection Events)]
+        DASH[React Dashboard<br/>Real-Time Monitoring]
+    end
+    
+    C1 -->|RTSP Stream| E1
+    C2 -->|RTSP Stream| E2
+    C3 -->|RTSP Stream| E3
+    C4 -->|RTSP Stream| E1
+    
+    E1 --> Y
+    Y --> A
+    A --> S
+    S --> B
+    
+    E1 <-->|UDP Multicast<br/>Byzantine Protocol| E2
+    E2 <-->|UDP Multicast<br/>Byzantine Protocol| E3
+    E3 <-->|UDP Multicast<br/>Byzantine Protocol| E1
+    
+    B -->|HTTPS/JSON<br/>Anomalies Only<br/>74.5% BW Saved| API
+    E2 -->|HTTPS/JSON| API
+    E3 -->|HTTPS/JSON| API
+    
+    API --> DB
+    API --> DASH
+    
+    style Y fill:#42A5F5,stroke:#1976D2,stroke-width:2px,color:#fff
+    style A fill:#66BB6A,stroke:#388E3C,stroke-width:2px,color:#fff
+    style S fill:#FFA726,stroke:#F57C00,stroke-width:2px,color:#fff
+    style B fill:#EF5350,stroke:#C62828,stroke-width:2px,color:#fff
+    style API fill:#AB47BC,stroke:#6A1B9A,stroke-width:2px,color:#fff
+    style DB fill:#26A69A,stroke:#00796B,stroke-width:2px,color:#fff
+    style DASH fill:#5C6BC0,stroke:#283593,stroke-width:2px,color:#fff

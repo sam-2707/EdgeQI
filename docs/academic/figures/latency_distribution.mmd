@@ -1,0 +1,26 @@
+graph LR
+    subgraph Components[Latency Breakdown - EDGE-QI 151ms Total]
+        Q[Queueing Delay<br/>42ms<br/>27.8%]
+        P[Processing Time<br/>95ms<br/>62.9%]
+        T[Transmission<br/>14ms<br/>9.3%]
+    end
+    
+    subgraph Comparison[vs Baseline 402ms]
+        BQ[Baseline Queue<br/>180ms]
+        BP[Baseline Process<br/>200ms]
+        BT[Baseline Transmit<br/>22ms]
+    end
+    
+    Q -.->|Optimized| BQ
+    P -.->|Optimized| BP
+    T -.->|Optimized| BT
+    
+    Result[62.5% Latency<br/>Reduction ✓<br/>151ms vs 402ms]
+    
+    Components --> Result
+    Comparison --> Result
+    
+    style Q fill:#42A5F5,stroke:#1976D2,stroke-width:2px,color:#fff
+    style P fill:#66BB6A,stroke:#388E3C,stroke-width:2px,color:#fff
+    style T fill:#FFA726,stroke:#F57C00,stroke-width:2px,color:#fff
+    style Result fill:#4CAF50,stroke:#2E7D32,stroke-width:3px,color:#fff

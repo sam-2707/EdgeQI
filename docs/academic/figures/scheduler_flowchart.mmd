@@ -1,0 +1,28 @@
+flowchart TD
+    Start([Start: New Task Arrives]) --> GetState[Get System State<br/>Battery, Network, CPU]
+    GetState --> CalcWeights[Calculate Dynamic Weights<br/>α = 0.4 × 1-battery/100<br/>β = 0.4 × 1+network/100<br/>γ = 0.2]
+    CalcWeights --> Normalize[Normalize Weights<br/>α + β + γ = 1.0]
+    Normalize --> InitBest[Initialize:<br/>best_node = NULL<br/>min_cost = ∞]
+    
+    InitBest --> LoopStart{For Each<br/>Edge Node}
+    LoopStart -->|Next Node| CheckCap{Has<br/>Capacity?}
+    CheckCap -->|No| LoopStart
+    CheckCap -->|Yes| EstEnergy[Estimate Energy<br/>E = κ × cycles × f²]
+    
+    EstEnergy --> EstLatency[Estimate Latency<br/>L = Tproc + Tqueue + Ttrans]
+    EstLatency --> CalcCost[Calculate Cost<br/>Cost = α×E + β×L - γ×Priority]
+    
+    CalcCost --> Compare{Cost <<br/>min_cost?}
+    Compare -->|Yes| UpdateBest[Update:<br/>min_cost = Cost<br/>best_node = current]
+    Compare -->|No| LoopStart
+    UpdateBest --> LoopStart
+    
+    LoopStart -->|Done| AssignTask[Assign Task to best_node]
+    AssignTask --> UpdateQueue[Update Task Queue<br/>& Node Resources]
+    UpdateQueue --> End([End: Task Scheduled])
+    
+    style Start fill:#4CAF50,stroke:#2E7D32,stroke-width:3px,color:#fff
+    style End fill:#F44336,stroke:#C62828,stroke-width:3px,color:#fff
+    style CalcWeights fill:#2196F3,stroke:#1565C0,stroke-width:2px,color:#fff
+    style CalcCost fill:#FF9800,stroke:#E65100,stroke-width:2px,color:#fff
+    style AssignTask fill:#9C27B0,stroke:#6A1B9A,stroke-width:2px,color:#fff

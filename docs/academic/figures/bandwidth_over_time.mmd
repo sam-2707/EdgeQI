@@ -1,0 +1,14 @@
+graph LR
+    Phase1[Phase 1: Baseline<br/>0-100 frames<br/>48% TX<br/>52% Saved]
+    Phase2[Phase 2: Stabilization<br/>100-300 frames<br/>31% TX<br/>69% Saved]
+    Phase3[Phase 3: Steady-State<br/>300+ frames<br/>24% TX<br/>76% Saved ✓]
+    Target[Target: 74.5%<br/>⭐ ACHIEVED]
+    
+    Phase1 -->|Window Filling| Phase2
+    Phase2 -->|Statistics Stable| Phase3
+    Phase3 -->|Exceeds Target| Target
+    
+    style Phase1 fill:#FF9800,stroke:#E65100,stroke-width:2px,color:#fff
+    style Phase2 fill:#2196F3,stroke:#1565C0,stroke-width:2px,color:#fff
+    style Phase3 fill:#4CAF50,stroke:#2E7D32,stroke-width:3px,color:#fff
+    style Target fill:#F44336,stroke:#C62828,stroke-width:3px,color:#fff

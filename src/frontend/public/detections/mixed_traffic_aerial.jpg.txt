@@ -1,0 +1,3 @@
+Placeholder for mixed_traffic_aerial.jpg
+This file represents the mixed traffic aerial view with various vehicle types.
+The user should copy their actual traffic monitoring image here with this filename.

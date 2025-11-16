@@ -1,0 +1,3 @@
+Placeholder for pedestrian_area.jpg
+This file represents the pedestrian-heavy area with people detection focus.
+The user should copy their actual traffic monitoring image here with this filename.

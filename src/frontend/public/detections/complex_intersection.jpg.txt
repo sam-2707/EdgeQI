@@ -1,0 +1,3 @@
+Placeholder for complex_intersection.jpg
+This file represents the complex multi-lane intersection scenario with cars and buses.
+The user should copy their actual traffic monitoring image here with this filename.

@@ -1,0 +1,47 @@
+flowchart LR
+    Input[Input Frame<br/>1920×1080×3] --> Preprocess[Preprocessing<br/>20ms]
+    
+    subgraph Preprocess
+        Resize[Resize<br/>640×640]
+        Norm[Normalize<br/>0-1]
+        Letterbox[Letterbox<br/>Padding]
+    end
+    
+    Preprocess --> Backbone[Backbone<br/>CSPDarknet53<br/>150ms]
+    
+    subgraph Backbone
+        Conv1[Conv Layers<br/>53 layers]
+        CSP[CSP Blocks<br/>3.2M params]
+        Extract[Feature Maps<br/>80×80, 40×40, 20×20]
+    end
+    
+    Backbone --> Neck[Neck<br/>PAN-FPN<br/>15ms]
+    
+    subgraph Neck
+        FPN[Feature Pyramid<br/>Multi-Scale Fusion]
+        PAN[Path Aggregation<br/>Bottom-Up]
+    end
+    
+    Neck --> Head[Detection Head<br/>5ms]
+    
+    subgraph Head
+        Cls[Classification<br/>Branch]
+        Box[BBox Regression<br/>Branch]
+        NMS[NMS<br/>IoU=0.45]
+    end
+    
+    Head --> Output[Output<br/>Detections]
+    
+    subgraph Output
+        Det1[Car: 42<br/>Conf: 0.98]
+        Det2[Truck: 7<br/>Conf: 0.95]
+        Det3[Pedestrian: 15<br/>Conf: 0.92]
+    end
+    
+    Output --> Total[Total Time:<br/>187ms<br/>5.34 FPS]
+    
+    style Input fill:#4CAF50,stroke:#2E7D32,stroke-width:2px,color:#fff
+    style Backbone fill:#2196F3,stroke:#1565C0,stroke-width:2px,color:#fff
+    style Neck fill:#FF9800,stroke:#E65100,stroke-width:2px,color:#fff
+    style Head fill:#9C27B0,stroke:#6A1B9A,stroke-width:2px,color:#fff
+    style Total fill:#F44336,stroke:#C62828,stroke-width:3px,color:#fff

@@ -1,0 +1,47 @@
+graph TB
+    Input[Input Layer<br/>640×640×3<br/>0 params]
+    
+    subgraph Backbone[Backbone: CSPDarknet53]
+        C1[Conv1: 320×320×16<br/>432 params]
+        C2[Conv2: 160×160×32<br/>4,608 params]
+        CSP1[C2f_1: 160×160×32<br/>7,040 params]
+        C3[Conv3: 80×80×64<br/>18,432 params]
+        CSP2[C2f_2: 80×80×64<br/>41,024 params]
+        C4[Conv4: 40×40×128<br/>73,728 params]
+        CSP3[C2f_3: 40×40×128<br/>165,888 params]
+        C5[Conv5: 20×20×256<br/>295,424 params]
+        CSP4[C2f_4: 20×20×256<br/>921,600 params]
+        SPPF[SPPF: 20×20×256<br/>164,096 params]
+    end
+    
+    subgraph Neck[Neck: PAN-FPN]
+        UP1[Upsample1: 40×40×256]
+        CONCAT1[Concat1: 40×40×384]
+        CSP5[C2f_5: 40×40×128<br/>461,056 params]
+        UP2[Upsample2: 80×80×128]
+        CONCAT2[Concat2: 80×80×192]
+        CSP6[C2f_6: 80×80×64<br/>115,712 params]
+    end
+    
+    subgraph Head[Detection Head]
+        DET1[Detect_1: 80×80×85<br/>54,400 params]
+        DET2[Detect_2: 40×40×85<br/>216,320 params]
+        DET3[Detect_3: 20×20×85<br/>864,512 params]
+    end
+    
+    Total[Total: 3,204,841 params<br/>6.25MB Model Size<br/>8.7B FLOPs]
+    
+    Input --> C1 --> C2 --> CSP1 --> C3 --> CSP2 --> C4 --> CSP3 --> C5 --> CSP4 --> SPPF
+    SPPF --> UP1 --> CONCAT1 --> CSP5 --> UP2 --> CONCAT2 --> CSP6
+    CSP6 --> DET1
+    CSP5 --> DET2
+    SPPF --> DET3
+    DET1 --> Total
+    DET2 --> Total
+    DET3 --> Total
+    
+    style Input fill:#4CAF50,stroke:#2E7D32,stroke-width:2px,color:#fff
+    style Backbone fill:#2196F3,stroke:#1565C0,stroke-width:2px
+    style Neck fill:#FF9800,stroke:#E65100,stroke-width:2px
+    style Head fill:#9C27B0,stroke:#6A1B9A,stroke-width:2px
+    style Total fill:#F44336,stroke:#C62828,stroke-width:3px,color:#fff

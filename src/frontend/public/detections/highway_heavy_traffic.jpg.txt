@@ -1,0 +1,3 @@
+Placeholder for highway_heavy_traffic.jpg  
+This file represents the heavy highway traffic scenario with dense vehicle congestion.
+The user should copy their actual traffic monitoring image here with this filename.
